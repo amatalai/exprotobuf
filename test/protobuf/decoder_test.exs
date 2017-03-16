@@ -2,21 +2,44 @@ defmodule Protobuf.Decoder.Test do
   use Protobuf.Case
   alias Protobuf.Decoder, as: D
 
-  test "fix :undefined values to default value" do
-    defmodule UndefinedValuesProto do
-      use Protobuf, """
-        message Msg {
-          optional int32 f1 = 1;
-          required int32 f2 = 2;
-        }
-        service MsgService {
-          rpc hi(Msg) returns (Msg);
-        }
-        """
+  describe "fix :undefined values to default value" do
+    test "proto2" do
+      defmodule UndefinedValuesProto2 do
+        use Protobuf, """
+          message Msg {
+            optional int32 f1 = 1;
+            required int32 f2 = 2;
+            optional int32 f3 = 3 [default = 500];
+          }
+          service MsgService {
+            rpc hi(Msg) returns (Msg);
+          }
+          """
+      end
+
+      module = UndefinedValuesProto2.Msg
+      assert %{:__struct__ => ^module, :f1 => nil, :f2 => 150, :f3 => 500} = D.decode(<<16, 150, 1>>, UndefinedValuesProto2.Msg)
     end
 
-    module = UndefinedValuesProto.Msg
-    assert %{:__struct__ => ^module, :f1 => 0, :f2 => 150} = D.decode(<<16, 150, 1>>, UndefinedValuesProto.Msg)
+    test "proto3" do
+      defmodule UndefinedValuesProto3 do
+        use Protobuf, """
+          syntax = "proto3";
+
+          message Msg {
+            optional int32 f1 = 1;
+            required int32 f2 = 2;
+            optional int32 f3 = 3 [default = 500];
+          }
+          service MsgService {
+            rpc hi(Msg) returns (Msg);
+          }
+          """
+      end
+
+      module = UndefinedValuesProto3.Msg
+      assert %{:__struct__ => ^module, :f1 => 0, :f2 => 150, :f3 => 0} = D.decode(<<16, 150, 1>>, UndefinedValuesProto3.Msg)
+    end
   end
 
   test "fix repeated values" do
