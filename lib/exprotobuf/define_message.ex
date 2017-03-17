@@ -7,7 +7,7 @@ defmodule Protobuf.DefineMessage do
   alias Protobuf.OneOfField
   alias Protobuf.Delimited
 
-  def def_message(name, fields, [inject: inject, doc: doc]) when is_list(fields) do
+  def def_message(name, fields, [inject: inject, doc: doc, syntax: syntax]) when is_list(fields) do
     struct_fields = record_fields(fields)
     # Inject everything in 'using' module
     if inject do
@@ -18,6 +18,7 @@ defmodule Protobuf.DefineMessage do
         fields = unquote(struct_fields)
 
         def record, do: @record
+        def syntax, do: unquote(syntax)
 
         unquote(encode_decode(name))
         unquote(fields_methods(fields))
@@ -44,6 +45,7 @@ defmodule Protobuf.DefineMessage do
           defstruct @record
 
           def record, do: @record
+          def syntax, do: unquote(syntax)
 
           unquote(encode_decode(name))
           unquote(fields_methods(fields))
