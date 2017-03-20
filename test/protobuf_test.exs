@@ -5,15 +5,15 @@ defmodule ProtobufTest do
     defmodule RoundtripProto do
       use Protobuf, """
       message Msg1 {
-        required uint32 f1 = 1;
+        optional uint32 f1 = 1;
       }
 
       message Msg2 {
-        required string f1 = 1;
+        optional string f1 = 1;
       }
       """
     end
-    msg1 = RoundtripProto.Msg1.new(f1: 1)
+    msg1 = RoundtripProto.Msg1.new()
     encoded1 = RoundtripProto.Msg1.encode(msg1)
     assert ^msg1 = RoundtripProto.Msg1.decode(encoded1)
 
